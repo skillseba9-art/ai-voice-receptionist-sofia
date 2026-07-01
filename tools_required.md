@@ -2,9 +2,9 @@
 
 ## Goal
 
-এই project client কে deliver করা হবে না।
-লক্ষ্য: নিজেরা সম্পূর্ণ build করে prove করা যে এটা করতে পারি।
-**সব tool = Free tier / Free trial — কোনো টাকা খরচ নেই।**
+This project is for demonstration purposes and will not be delivered to a client.
+Goal: Build the complete project to demonstrate capabilities.
+**All tools = Free tier / Free trial — zero cost.**
 
 ---
 
@@ -48,8 +48,8 @@
 
 ```
 Free tier: $10 credit on signup (no card needed initially)
-What it does: Retell AI এর মতোই — call routing, LLM connect, TTS inject
-Why Vapi over Retell: Retell free tier limited, Vapi $10 credit বেশি কাজের
+What it does: Similar to Retell AI — call routing, LLM connection, TTS injection
+Why Vapi over Retell: Retell's free tier is limited, Vapi's $10 credit is much more useful
 Setup: vapi.ai → Sign up → Create Assistant → Connect ElevenLabs + Groq
 ```
 
@@ -62,23 +62,23 @@ Voice selection: "Rachel" or "Charlotte" — sophisticated female voice
 Setup: elevenlabs.io → Free account → Copy API Key → Paste into Vapi
 ```
 
-### 3. Vapi.ai Built-in Phone Number — Telephony (Twilio বাদে)
+### 3. Vapi.ai Built-in Phone Number — Telephony (Without Twilio)
 
 ```
-Cost: $10 credit থেকে কাটবে (~$1.15/month per number)
-What it does: Vapi এর dashboard থেকে সরাসরি phone number কিনুন
-Twilio লাগবে না — Vapi নিজেই number provision করে দেয়
+Cost: Deducted from $10 credit (~$1.15/month per number)
+What it does: Buy phone number directly from Vapi dashboard
+No Twilio required — Vapi provisions numbers natively
 Setup: vapi.ai → Dashboard → Phone Numbers → Buy Number → Done
 ```
 
 ### 3b. Vonage Free Trial — SMS Only
 
 ```
-Free credit: €2 on signup (কোনো card ছাড়া)
+Free credit: €2 on signup (no card required)
 Covers: ~40–60 test SMS messages
-What it does: Booking confirmation SMS → customer এর phone এ
-Setup: vonage.com → Sign up → API key + secret → n8n এ plug in
-Alternative: Demo তে SMS skip করে শুধু email দিলেও চলবে
+What it does: Booking confirmation SMS → sent to customer's phone
+Setup: vonage.com → Sign up → API key + secret → plug into n8n
+Alternative: For the demo, SMS can be skipped; email-only is fine
 ```
 
 ### 4. n8n Self-Hosted — Workflow Automation
@@ -152,7 +152,7 @@ Total cost: $0
 | Pinecone | 100K vectors | Restaurant KB is ~500 vectors ✅ |
 | Google APIs | Free always | Yes ✅ |
 
-**সব মিলিয়ে এই demo তে মোট খরচ = $0**
+**Total cost for this demo = $0**
 
 ---
 

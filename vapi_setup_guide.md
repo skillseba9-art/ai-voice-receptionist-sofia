@@ -4,12 +4,12 @@
 
 ---
 
-## Step 1 — Vapi Dashboard এ Assistant তৈরি
+## Step 1 — Create Assistant in Vapi Dashboard
 
 ```
 1. vapi.ai → Login → Dashboard
 2. Left sidebar → "Assistants" → "+ Create Assistant"
-3. Template: "Blank Assistant" select করুন
+3. Template: Select "Blank Assistant"
 4. Name: "Crimson Courtyard Receptionist"
 5. Save
 ```
@@ -22,12 +22,12 @@
 Assistant Settings → Model tab:
 
 Provider     : Groq
-Model        : llama-3.3-70b-versatile   (অথবা mixtral-8x7b-32768)
+Model        : llama-3.3-70b-versatile   (or mixtral-8x7b-32768)
 Temperature  : 0.4   (consistent, not too creative)
-Max Tokens   : 300   (voice এ ছোট response ভালো)
+Max Tokens   : 300   (shorter responses are better for voice)
 ```
 
-**Groq API Key কোথায় পাবেন:**
+**Where to find Groq API Key:**
 
 ```
 console.groq.com → API Keys → Create API Key → Copy
@@ -43,13 +43,13 @@ Assistant Settings → Voice tab:
 
 Provider : ElevenLabs
 Voice    : "Rachel" (warm, professional, clear)
-          অথবা "Charlotte" (sophisticated female)
+          or "Charlotte" (sophisticated female)
 Model    : eleven_flash_v2_5   (fastest, lowest latency)
 Stability       : 0.5
 Similarity Boost: 0.75
 ```
 
-**ElevenLabs API Key কোথায় পাবেন:**
+**Where to find ElevenLabs API Key:**
 
 ```
 elevenlabs.io → Profile → API Key → Copy
@@ -60,7 +60,7 @@ Vapi → Assistant → Voice → ElevenLabs → Paste API Key
 
 ## Step 4 — First Message (Greeting)
 
-Assistant Settings → "First Message" field তে paste করুন:
+Paste into Assistant Settings → "First Message" field:
 
 ```
 Thank you for calling The Crimson Courtyard, Dhanmondi's premier fine dining destination. I'm your AI receptionist. How may I assist you today? I can help you with table reservations, menu information, or answer any questions about our restaurant.
@@ -70,7 +70,7 @@ Thank you for calling The Crimson Courtyard, Dhanmondi's premier fine dining des
 
 ## Step 5 — System Prompt
 
-Assistant Settings → "System Prompt" field তে **vapi_system_prompt.md** এর content paste করুন।
+Paste the contents of **vapi_system_prompt.md** into Assistant Settings → "System Prompt" field.
 
 ---
 
@@ -91,10 +91,10 @@ End Call Phrases    : ["goodbye", "thank you bye", "that's all", "hang up"]
 
 ```
 Left sidebar → "Phone Numbers" → "+ Add Phone Number"
-Provider : Vapi (recommended) অথবা Twilio
-Country  : United States (+1) — Bangladesh নেই, তাই US number নিন
-           (Demo তে এটাই কাজ করবে)
-→ Buy Number (credit থেকে ~$1.15 কাটবে)
+Provider : Vapi (recommended) or Twilio
+Country  : United States (+1) — Use US number for demo purposes
+           (This will work for the demo)
+→ Buy Number (deducts ~$1.15 from credit)
 → Assign to: "Crimson Courtyard Receptionist"
 ```
 
@@ -103,8 +103,8 @@ Country  : United States (+1) — Bangladesh নেই, তাই US number ন�
 ## Step 8 — Test Call
 
 ```
-Assistant Dashboard → "Test" button (web call, phone লাগবে না)
-অথবা: Phone Number কিনলে সেই number এ call করুন
+Assistant Dashboard → "Test" button (web call, no physical phone needed)
+Or: If a phone number is purchased, call that number directly
 
 Test scenarios:
 1. "I'd like to book a table for 2 on Saturday at 7pm"
@@ -122,7 +122,7 @@ Test scenarios:
 Assistant Settings → Functions tab → "+ Add Function"
 Name: "create_booking"
 Description: "Save a table booking to the system"
-→ URL: [n8n webhook URL — পরে add করবেন]
+→ URL: [n8n webhook URL — will be added later]
 ```
 
 ---
