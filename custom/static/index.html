@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sofia — The Crimson Courtyard</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --gold: #c4a04a;
+      --gold-l: #e0c872;
+      --gold-d: #8a6e2a;
+      --crim: #7a1515;
+      --crim-b: #a82020;
+      --void: #08060f;
+      --ink: #1a1428;
+      --violet: #2c2440;
+      --parch: #e8d5a3;
+      --parch-d: #c4b48a;
+      --green: #2ecc71;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--void)
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--parch);
+      overflow-x: hidden
+    }
+
+    .cg {
+      font-family: 'Cormorant Garamond', serif
+    }
+
+    /* Gold gradient text */
+    .gold-text {
+      background: linear-gradient(135deg, var(--gold-d), var(--gold-l), var(--gold), var(--gold-d));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text
+    }
+
+    /* Glass surfaces */
+    .glass {
+      background: rgba(8, 6, 15, .7);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(196, 160, 74, .12)
+    }
+
+    /* Live dot */
+    @keyframes livePulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    .live {
+      animation: livePulse 1.8s ease-in-out infinite
+    }
+
+    /* Transcript fade-in */
+    @keyframes fadeRise {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .msg {
+      animation: fadeRise .4s ease forwards
+    }
+
+    /* Mic ripple rings */
+    @keyframes ripple {
+      0% {
+        transform: scale(1);
+        opacity: .65
+      }
+
+      100% {
+        transform: scale(1.8);
+        opacity: 0
+      }
+    }
+
+    .rpl1 {
+      animation: ripple 1.2s ease-out infinite
+    }
+
+    .rpl2 {
+      animation: ripple 1.2s ease-out .4s infinite
+    }
+
+    .rpl3 {
+      animation: ripple 1.2s ease-out .8s infinite
+    }
+
+    /* Control glow */
+    @keyframes goldGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(196, 160, 74, 0)
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(196, 160, 74, .07), 0 0 20px rgba(196, 160, 74, .1)
+      }
+    }
+
+    .gold-glow {
+      animation: goldGlow 2.4s ease-in-out infinite
+    }
+
+    /* Eye blink */
+    @keyframes blink {
+
+      0%,
+      88%,
+      100% {
+        transform: scaleY(1)
+      }
+
+      94% {
+        transform: scaleY(.06)
+      }
+    }
+
+    .bl1 {
+      animation: blink 6s ease-in-out infinite;
+      transform-origin: center 73px
+    }
+
+    .bl2 {
+      animation: blink 6s ease-in-out .28s infinite;
+      transform-origin: center 73px
+    }
+
+    /* Mouth open (CSS on SVG via scaleY) */
+    @keyframes lipSync {
+      0% {
+        transform: scaleY(0)
+      }
+
+      25% {
+        transform: scaleY(1)
+      }
+
+      50% {
+        transform: scaleY(.3)
+      }
+
+      75% {
+        transform: scaleY(1.1)
+      }
+
+      100% {
+        transform: scaleY(.12)
+      }
+    }
+
+    .lip-on {
+      animation: lipSync .13s steps(4, end) infinite;
+      transform-origin: 55px 97px
+    }
+
+    /* Breathing idle */
+    @keyframes breathe {
+
+      0%,
+      100% {
+        opacity: .38
+      }
+
+      50% {
+        opacity: .65
+      }
+    }
+
+    .breathe {
+      animation: breathe 3.2s ease-in-out infinite
+    }
+
+    ::-webkit-scrollbar {
+      width: 0
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ─────────── ICONS ─────────── */
+    const IcoMic = ({ s = 24, c = 'currentColor' }) => (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" />
+      </svg>
+    );
+    const IcoMicOff = ({ s = 22, c = 'currentColor' }) => (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="2" y1="2" x2="22" y2="22" />
+        <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" /><path d="M5 10v2a7 7 0 0 0 12 4.9" />
+        <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" /><path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+        <line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" />
+      </svg>
+    );
+    const IcoPhoneOff = ({ s = 20, c = 'currentColor' }) => (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07" />
+        <path d="M14.5 6.5A10 10 0 0 0 6.5 14.5" /><path d="M3.05 8.5A19.79 19.79 0 0 0 6.7 17" />
+        <line x1="2" y1="2" x2="22" y2="22" />
+      </svg>
+    );
+    const IcoChat = ({ s = 18, c = 'currentColor' }) => (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    );
+
+    /* ─────────── RADIAL BEAM AURA ─────────── */
+    const N = 48;
+    function BeamAura({ state, intensity }) {
+      const rafRef = useRef(null);
+      const refs = useRef([]);
+      const t = useRef(0);
+
+      useEffect(() => {
+        const speaking = state === 'sofia_speaking';
+        const recording = state === 'caller_recording';
+        const animate = () => {
+          t.current += .03;
+          const tc = t.current;
+          refs.current.forEach((line, i) => {
+            if (!line) return;
+            const angle = (i / N) * Math.PI * 2;
+            let len, op;
+            if (speaking) {
+              const a0 = Math.abs(Math.sin(angle * 4 + tc * 3.6)) * intensity * 22;
+              const a1 = Math.abs(Math.sin(angle * 9 - tc * 2.4)) * intensity * 12;
+              const a2 = Math.abs(Math.cos(angle * 6 + tc * 4.1)) * intensity * 8;
+              len = 8 + a0 + a1 + a2;
+              op = .3 + intensity * .55;
+            } else if (recording) {
+              len = 6 + Math.abs(Math.sin(angle * 5 + tc * 2)) * intensity * 16;
+              op = .4 + intensity * .4;
+            } else {
+              // Idle: very gentle, barely there
+              len = 3 + Math.abs(Math.sin(tc * .6 + i * .26)) * 4;
+              op = .12 + Math.abs(Math.sin(tc * .4 + i * .3)) * .1;
+            }
+            const r0 = 74;
+            const cx = 150, cy = 150;
+            const x1 = (cx + r0 * Math.cos(angle)).toFixed(2);
+            const y1 = (cy + r0 * Math.sin(angle)).toFixed(2);
+            const x2 = (cx + (r0 + len) * Math.cos(angle)).toFixed(2);
+            const y2 = (cy + (r0 + len) * Math.sin(angle)).toFixed(2);
+            line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+            line.setAttribute('opacity', op.toFixed(3));
+          });
+          rafRef.current = requestAnimationFrame(animate);
+        };
+        rafRef.current = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(rafRef.current);
+      }, [state, intensity]);
+
+      const speaking = state === 'sofia_speaking';
+      const recording = state === 'caller_recording';
+      const lc = speaking ? '#a82020' : recording ? '#2ecc71' : '#c4a04a';
+
+      return (
+        <svg viewBox="0 0 300 300" style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          filter: speaking
+            ? 'drop-shadow(0 0 16px rgba(168,32,32,.55)) drop-shadow(0 0 32px rgba(196,160,74,.25))'
+            : recording
+              ? 'drop-shadow(0 0 12px rgba(46,204,113,.4))'
+              : 'drop-shadow(0 0 8px rgba(196,160,74,.2))',
+        }}>
+          <defs>
+            <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stopColor="#220a0a" />
+              <stop offset="100%" stopColor="#060410" />
+            </radialGradient>
+            <radialGradient id="gg" cx="50%" cy="28%" r="72%">
+              <stop offset="0%" stopColor="#e8c872" />
+              <stop offset="55%" stopColor="#c4a04a" />
+              <stop offset="100%" stopColor="#7a6020" />
+            </radialGradient>
+            <filter id="soften"><feGaussianBlur stdDeviation="1.5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+          </defs>
+
+          {/* Radial beams — the signature element */}
+          {Array.from({ length: N }, (_, i) => (
+            <line key={i} ref={el => refs.current[i] = el}
+              x1="150" y1="150" x2="150" y2="150"
+              stroke={lc} strokeWidth={i % 3 === 0 ? 1.2 : .8} strokeLinecap="round"
+              opacity=".1" filter="url(#soften)"
+            />
+          ))}
+
+          {/* Avatar circle base */}
+          <circle cx="150" cy="150" r="72" fill="url(#bg)" />
+          {/* Gold border ring */}
+          <circle cx="150" cy="150" r="72" stroke="url(#gg)" strokeWidth="1" fill="none" opacity=".5" />
+          {/* Inner subtle ring */}
+          <circle cx="150" cy="150" r="69" stroke="#c4a04a" strokeWidth=".5" fill="none" opacity=".18" />
+        </svg>
+      );
+    }
+
+    /* ─────────── SOFIA FACE (SVG) ─────────── */
+    function SofiaFace({ state }) {
+      const talking = state === 'sofia_speaking';
+      return (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-52%)', width: '118px', height: '132px', pointerEvents: 'none' }}>
+          <svg viewBox="0 0 110 132" width="118" height="132" overflow="visible">
+            <defs>
+              <linearGradient id="skin" x1="0%" y1="0%" x2="40%" y2="100%">
+                <stop offset="0%" stopColor="#d89868" />
+                <stop offset="100%" stopColor="#be7848" />
+              </linearGradient>
+              <linearGradient id="suit" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0f1e3a" />
+                <stop offset="100%" stopColor="#08112a" />
+              </linearGradient>
+            </defs>
+
+            {/* Headset arc */}
+            <path d="M 12 48 Q 55 2 98 48" fill="none" stroke="#3a3a58" strokeWidth="3" strokeLinecap="round" />
+            {/* Ear pads */}
+            <rect x="5" y="46" width="13" height="22" rx="5" fill="#28284a" />
+            <rect x="92" y="46" width="13" height="22" rx="5" fill="#28284a" />
+            {/* Mic boom */}
+            <line x1="96" y1="62" x2="90" y2="82" stroke="#3a3a58" strokeWidth="1.8" strokeLinecap="round" />
+            <circle cx="89" cy="84" r="5" fill="#10102a" stroke={talking ? '#a82020' : '#3a3a58'} strokeWidth="1.5"
+              style={{ transition: 'stroke .3s', filter: talking ? 'drop-shadow(0 0 4px #a82020)' : 'none' }} />
+
+            {/* Head */}
+            <ellipse cx="55" cy="78" rx="37" ry="41" fill="url(#skin)" />
+            {/* Hair */}
+            <ellipse cx="55" cy="54" rx="39" ry="23" fill="#14100c" />
+            {/* Cheek shading */}
+            <ellipse cx="38" cy="85" rx="9" ry="7" fill="rgba(180,80,60,.12)" />
+            <ellipse cx="72" cy="85" rx="9" ry="7" fill="rgba(180,80,60,.12)" />
+
+            {/* Eyes */}
+            <ellipse className="bl1" cx="40" cy="73" rx="6" ry="5.5" fill="#160808" />
+            <circle cx="42.5" cy="71" r="1.8" fill="rgba(255,255,255,.55)" />
+            <ellipse className="bl2" cx="70" cy="73" rx="6" ry="5.5" fill="#160808" />
+            <circle cx="72.5" cy="71" r="1.8" fill="rgba(255,255,255,.55)" />
+            {/* Eyebrows */}
+            <path d="M 33 65 Q 40 61 48 64" fill="none" stroke="#140e0a" strokeWidth="2" strokeLinecap="round" />
+            <path d="M 62 64 Q 70 61 77 65" fill="none" stroke="#140e0a" strokeWidth="2" strokeLinecap="round" />
+
+            {/* Nose */}
+            <path d="M 52 84 Q 55 89 58 84" fill="none" stroke="rgba(154,88,52,.6)" strokeWidth="1.5" strokeLinecap="round" />
+
+            {/* Mouth */}
+            <path d="M 43 96 Q 47 92 55 94 Q 63 92 67 96" fill="none" stroke="#9a5030" strokeWidth="1.5" />
+            {/* Mouth gap — animated via CSS scaleY */}
+            <rect className={talking ? 'lip-on' : ''} x="43" y="97" width="24" height="11" rx="2" fill="#160808"
+              style={{ transformOrigin: '55px 97px', transform: 'scaleY(0)' }} />
+            <path d="M 42 97 Q 55 106 68 97" fill="#b06040" />
+
+            {/* Neck */}
+            <rect x="44" y="117" width="22" height="18" fill="url(#skin)" />
+            {/* Suit / shoulders */}
+            <ellipse cx="55" cy="140" rx="55" ry="22" fill="url(#suit)" />
+            {/* Collar */}
+            <polygon points="47,118 55,126 63,118 67,135 55,128 43,135" fill="#f0eeec" />
+          </svg>
+        </div>
+      );
+    }
+
+    /* ─────────── MAIN APP ─────────── */
+    function App() {
+      const [cs, setCs] = useState('idle'); // callState
+      const [msgs, setMsgs] = useState([]);
+      const [lang, setLang] = useState('en');
+      const [timer, setTimer] = useState('00:00');
+      const [ready, setReady] = useState(false);
+      const [status, setStatus] = useState('CONNECTING');
+      const [muted, setMuted] = useState(false);
+      const [intens, setIntens] = useState(.5);
+      const [textMode, setTextMode] = useState(false);
+      const [textVal, setTextVal] = useState('');
+      const [sending, setSending] = useState(false);
+
+      const mrRef = useRef(null);
+      const chunksRef = useRef([]);
+      const timerRef = useRef(null);
+      const startRef = useRef(null);
+      const intensRef = useRef(null);
+      const histRef = useRef([]);
+      const endRef = useRef(null);
+
+      useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
+
+      const startTimer = () => { startRef.current = Date.now(); timerRef.current = setInterval(() => { const s = Math.floor((Date.now() - startRef.current) / 1000); setTimer(`${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`); }, 1000); };
+      const startIntens = () => { clearInterval(intensRef.current); intensRef.current = setInterval(() => setIntens(.35 + Math.random() * .65), 120); };
+      const stopIntens = () => { clearInterval(intensRef.current); setIntens(.5); };
+
+      const applyState = useCallback((s, l) => {
+        const ln = l || lang;
+        setCs(s);
+        if (s === 'sofia_speaking') startIntens(); else stopIntens();
+        const map = { sofia_speaking: 'SOFIA SPEAKING', caller_recording: ln === 'en' ? 'LISTENING' : 'শুনছি', processing: ln === 'en' ? 'PROCESSING' : 'প্রসেস হচ্ছে', idle: ln === 'en' ? 'HOLD TO SPEAK' : 'বলতে বাটন ধরুন', ended: 'CALL ENDED' };
+        setStatus(map[s] || '');
+      }, [lang]);
+
+      const addMsg = (role, text) => setMsgs(p => [...p, { role, text, id: Date.now() + Math.random() }]);
+      const playAudio = async (b64) => { try { const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0)); const ctx = new AudioContext(); const buf = await ctx.decodeAudioData(bytes.buffer); const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.start(); return new Promise(r => src.onended = r); } catch { } };
+
+      const loadGreeting = async (l) => {
+        setStatus('CONNECTING');
+        try { const res = await fetch(`/greeting?language=${l}`); const data = await res.json(); addMsg('sofia', data.text); applyState('sofia_speaking', l); await playAudio(data.audio); applyState('idle', l); startTimer(); } catch { setStatus('ERROR'); }
+      };
+
+      useEffect(() => {
+        const init = async () => {
+          try { await navigator.mediaDevices.getUserMedia({ audio: true }); await loadGreeting(lang); setReady(true); }
+          catch { setStatus('MIC REQUIRED'); await loadGreeting(lang); }
+        };
+        init();
+        return () => { clearInterval(timerRef.current); stopIntens(); };
+      }, []);
+
+      const toggleLang = () => { const nl = lang === 'en' ? 'bn' : 'en'; setLang(nl); histRef.current = []; setMsgs([]); loadGreeting(nl); };
+
+      const startRec = async (e) => { if (e?.preventDefault) e.preventDefault(); if (!ready || muted) return; chunksRef.current = []; const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); const ctx = new AudioContext(); const an = ctx.createAnalyser(); ctx.createMediaStreamSource(stream).connect(an); mrRef.current = new MediaRecorder(stream); mrRef.current.ondataavailable = ev => { if (ev.data.size > 0) chunksRef.current.push(ev.data); }; mrRef.current.start(500); applyState('caller_recording'); };
+
+      const stopRec = async () => { const mr = mrRef.current; if (!mr || mr.state === 'inactive') return; mr.stop(); mr.stream.getTracks().forEach(t => t.stop()); applyState('processing'); mr.onstop = async () => { const blob = new Blob(chunksRef.current); if (blob.size === 0) { alert("Error: Your microphone did not capture any audio data. Please check your mic settings."); applyState('idle'); return; } const fd = new FormData(); fd.append('audio', blob, 'audio.webm'); fd.append('history', JSON.stringify(histRef.current)); fd.append('language', lang); try { const res = await fetch('/talk', { method: 'POST', body: fd }); if (!res.ok) { const errData = await res.json().catch(() => ({})); alert("Error: " + (errData.error || "Server Error.")); applyState('idle'); return; } const data = await res.json(); addMsg('user', data.user_text); addMsg('sofia', data.assistant_text); histRef.current = [...histRef.current, { role: 'user', content: data.user_text }, { role: 'assistant', content: data.assistant_text }].slice(-20); applyState('sofia_speaking'); await playAudio(data.audio); applyState('idle'); } catch { applyState('idle'); setStatus('ERROR'); } }; };
+
+      const sendText = async () => { if (sending || !textVal.trim()) return; const msg = textVal.trim(); setTextVal(''); setSending(true); addMsg('user', msg); const snap = [...histRef.current]; histRef.current = [...snap, { role: 'user', content: msg }]; try { const fd = new FormData(); fd.append('message', msg); fd.append('history', JSON.stringify(snap)); fd.append('language', lang); const res = await fetch('/chat', { method: 'POST', body: fd }); if (res.ok) { const data = await res.json(); addMsg('sofia', data.assistant_text); histRef.current = [...histRef.current, { role: 'assistant', content: data.assistant_text }].slice(-20); applyState('sofia_speaking'); await playAudio(data.audio); applyState('idle'); } } catch { histRef.current = snap; } setSending(false); };
+
+      const endCall = () => { if (mrRef.current?.state !== 'inactive') { mrRef.current?.stop(); mrRef.current?.stream?.getTracks()?.forEach(t => t.stop()); } clearInterval(timerRef.current); stopIntens(); applyState('ended'); setReady(false); addMsg('sofia', lang === 'en' ? 'Thank you for calling The Crimson Courtyard. Have a wonderful day!' : 'The Crimson Courtyard-এ কল করার জন্য ধন্যবাদ। ভালো থাকবেন!'); };
+
+      const ended = cs === 'ended', speaking = cs === 'sofia_speaking', recording = cs === 'caller_recording';
+
+      // Status color
+      const statColor = speaking ? 'rgba(196,160,74,.75)' : recording ? 'rgba(46,204,113,.75)' : 'rgba(44,36,64,.9)';
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '18px 16px 22px', background: 'radial-gradient(ellipse at 50% -10%,#1e0808 0%,#0c060f 45%,#08060f 100%)' }}>
+
+          {/* Ambient orbs */}
+          <div style={{ position: 'fixed', top: '-20%', left: '-15%', width: '60%', height: '60%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(122,21,21,.05) 0%,transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+          <div style={{ position: 'fixed', bottom: '-25%', right: '-15%', width: '70%', height: '70%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(196,160,74,.04) 0%,transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+
+          {/* ── TOP BAR ── */}
+          <header style={{ width: '100%', maxWidth: '500px', position: 'relative', zIndex: 10 }}>
+            <div className="glass" style={{ borderRadius: '14px', padding: '11px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: '90px' }}>
+                {!ended && <div className="live" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2ecc71', flexShrink: 0 }} />}
+                <span style={{ fontSize: '.55rem', letterSpacing: '3px', color: ended ? 'rgba(80,70,100,.6)' : 'rgba(46,204,113,.7)', fontFamily: 'Inter', fontWeight: 400 }}>
+                  {ended ? 'ENDED' : 'LIVE CALL'}
+                </span>
+              </div>
+
+              <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                <div className="gold-text cg" style={{ fontSize: '.95rem', letterSpacing: '4px', fontWeight: 300 }}>
+                  THE CRIMSON COURTYARD
+                </div>
+                <div style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg,transparent,rgba(196,160,74,.3),transparent)', marginTop: '3px' }} />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '90px', justifyContent: 'flex-end' }}>
+                <span style={{ fontSize: '.55rem', letterSpacing: '3px', color: 'rgba(44,36,64,.9)', fontFamily: 'Inter' }}>{timer}</span>
+                <button onClick={toggleLang} style={{ padding: '3px 9px', borderRadius: '8px', background: 'transparent', border: '1px solid rgba(196,160,74,.2)', color: 'rgba(196,160,74,.6)', fontSize: '.62rem', cursor: 'pointer', fontFamily: 'Cormorant Garamond,serif', letterSpacing: '1px', transition: 'all .25s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(196,160,74,.5)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(196,160,74,.2)'}>
+                  {lang === 'en' ? 'বাংলা' : 'EN'}
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* ── AVATAR ── */}
+          <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', position: 'relative', zIndex: 10, flex: 1, justifyContent: 'flex-start', padding: '8vh 0 6px' }}>
+
+            {/* Status */}
+            <div style={{ fontSize: '.52rem', letterSpacing: '4px', fontFamily: 'Inter', fontWeight: 300, color: statColor, minHeight: '14px', textAlign: 'center', transition: 'color .6s' }}>{status}</div>
+
+            {/* Avatar container */}
+            <div style={{ position: 'relative', width: '280px', height: '280px' }}>
+              <BeamAura state={cs} intensity={intens} />
+              <SofiaFace state={cs} />
+              {/* Idle breathing ring */}
+              {!speaking && !recording && !ended && (
+                <div className="breathe" style={{ position: 'absolute', inset: '10px', borderRadius: '50%', border: '1px solid rgba(196,160,74,.06)', pointerEvents: 'none' }} />
+              )}
+            </div>
+
+            {/* Name plate */}
+            <div style={{ textAlign: 'center', marginTop: '-4px' }}>
+              <div className="gold-text cg" style={{ fontSize: '2rem', letterSpacing: '12px', fontWeight: 300, lineHeight: 1 }}>SOFIA</div>
+              <div style={{ fontSize: '.48rem', letterSpacing: '5px', color: 'rgba(196,160,74,.25)', fontFamily: 'Inter', marginTop: '4px', fontWeight: 300 }}>VOICE RECEPTIONIST</div>
+            </div>
+          </main>
+
+          {/* ── TRANSCRIPT ── */}
+          <section style={{ width: '100%', maxWidth: '600px', zIndex: 10, height: '38vh', minHeight: '300px', overflowY: 'auto', padding: '0 10px', marginBottom: '20px' }}>
+            {msgs.map(m => (
+              <div key={m.id} className="msg" style={{ display: 'flex', justifyContent: m.role === 'sofia' ? 'flex-start' : 'flex-end', marginBottom: '9px' }}>
+                <div style={{
+                  maxWidth: '78%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  lineHeight: '1.6',
+                  ...(m.role === 'sofia' ? {
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '.95rem',
+                    color: '#ffffff',
+                    background: 'rgba(168,32,32,.25)',
+                    border: '1px solid rgba(196,160,74,.4)',
+                    borderBottomLeftRadius: '2px',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
+                  } : {
+                    fontFamily: 'Roboto, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '.95rem',
+                    color: '#ffffff',
+                    background: 'rgba(255,255,255,.15)',
+                    border: '1px solid rgba(255,255,255,.3)',
+                    borderBottomRightRadius: '2px',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
+                  })
+                }}>
+                  <div style={{ fontSize: '.55rem', letterSpacing: '2.5px', marginBottom: '4px', fontFamily: 'Inter', fontWeight: 500, color: m.role === 'sofia' ? 'rgba(196,160,74,.9)' : 'rgba(255,255,255,.8)', textAlign: m.role === 'user' ? 'right' : 'left' }}>
+                    {m.role === 'sofia' ? 'SOFIA' : 'GUEST'}
+                  </div>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            <div ref={endRef} />
+          </section>
+
+          {/* ── CONTROLS ── */}
+          <footer style={{ width: '100%', maxWidth: '500px', zIndex: 10 }}>
+            <div className="glass" style={{
+              borderRadius: '100px',
+              padding: '14px 24px',
+              display: 'flex', alignItems: 'center',
+              gap: textMode ? '8px' : '0',
+              justifyContent: textMode ? 'stretch' : 'space-between',
+              background: 'rgba(6,4,14,.75)',
+              boxShadow: '0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(196,160,74,.04)',
+            }}>
+
+              {!textMode ? (
+                <>
+                  {/* Mute */}
+                  <button onClick={() => setMuted(!muted)} disabled={ended} style={{ width: '44px', height: '44px', borderRadius: '50%', background: muted ? 'rgba(168,32,32,.12)' : 'rgba(255,255,255,.03)', border: `1px solid ${muted ? 'rgba(168,32,32,.4)' : 'rgba(255,255,255,.08)'}`, color: muted ? '#c04040' : 'rgba(255,255,255,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: ended ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: ended ? .25 : 1 }}>
+                    {muted ? <IcoMicOff s={17} /> : <IcoMic s={17} />}
+                  </button>
+
+                  {/* Mic */}
+                  <div style={{ position: 'relative' }}>
+                    {recording && <>
+                      <div className="rpl1" style={{ position: 'absolute', inset: '-7px', borderRadius: '50%', border: '1px solid rgba(196,160,74,.45)', pointerEvents: 'none' }} />
+                      <div className="rpl2" style={{ position: 'absolute', inset: '-7px', borderRadius: '50%', border: '1px solid rgba(196,160,74,.3)', pointerEvents: 'none' }} />
+                      <div className="rpl3" style={{ position: 'absolute', inset: '-7px', borderRadius: '50%', border: '1px solid rgba(196,160,74,.15)', pointerEvents: 'none' }} />
+                    </>}
+                    <button onMouseDown={startRec} onMouseUp={stopRec}
+                      onTouchStart={e => { e.preventDefault(); startRec(); }} onTouchEnd={stopRec}
+                      disabled={ended || muted}
+                      className={recording ? '' : 'gold-glow'}
+                      style={{
+                        width: '68px', height: '68px', borderRadius: '50%',
+                        background: recording ? 'radial-gradient(circle at 38% 33%,#1e0808,#0c0408)' : 'radial-gradient(circle at 38% 33%,#16122a,#0a0818)',
+                        border: `2px solid ${recording ? 'rgba(196,160,74,.85)' : 'rgba(196,160,74,.28)'}`,
+                        color: recording ? '#c4a04a' : 'rgba(196,160,74,.55)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: (ended || muted) ? 'not-allowed' : 'pointer',
+                        boxShadow: recording ? '0 0 22px rgba(196,160,74,.22),inset 0 0 18px rgba(168,32,32,.1)' : 'none',
+                        opacity: (ended || muted) ? .25 : 1, transition: 'all .15s',
+                      }}>
+                      <IcoMic s={26} c={recording ? '#c4a04a' : 'rgba(196,160,74,.65)'} />
+                    </button>
+                  </div>
+
+                  {/* Text toggle */}
+                  <button onClick={() => setTextMode(true)} disabled={ended} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.08)', color: 'rgba(255,255,255,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: ended ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: ended ? .25 : 1 }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(196,160,74,.3)'; e.currentTarget.style.color = 'rgba(196,160,74,.6)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'; e.currentTarget.style.color = 'rgba(255,255,255,.3)'; }}>
+                    <IcoChat s={16} />
+                  </button>
+                </>
+              ) : (
+                /* Text mode */
+                <>
+                  <button onClick={() => setTextMode(false)} style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.08)', color: 'rgba(255,255,255,.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '.7rem' }}>✕</button>
+                  <input value={textVal} onChange={e => setTextVal(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); } }}
+                    placeholder={lang === 'en' ? 'Write to Sofia…' : 'Sofia-কে লিখুন…'}
+                    autoFocus
+                    style={{ flex: 1, padding: '9px 14px', borderRadius: '20px', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(196,160,74,.15)', color: 'rgba(232,213,163,.8)', fontFamily: 'Cormorant Garamond,serif', fontStyle: 'italic', fontSize: '.9rem', outline: 'none' }}
+                  />
+                  <button onClick={sendText} disabled={sending || !textVal.trim()} style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'rgba(196,160,74,.1)', border: '1px solid rgba(196,160,74,.25)', color: 'rgba(196,160,74,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (!textVal.trim() || sending) ? 'not-allowed' : 'pointer', opacity: (!textVal.trim() || sending) ? .3 : 1, fontSize: '.75rem' }}>↗</button>
+                  <button onClick={endCall} disabled={ended} style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'rgba(168,32,32,.08)', border: '1px solid rgba(168,32,32,.22)', color: 'rgba(168,32,32,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: ended ? 'not-allowed' : 'pointer', opacity: ended ? .25 : 1 }}>
+                    <IcoPhoneOff s={16} />
+                  </button>
+                </>
+              )}
+
+              {/* End call (voice mode only) */}
+              {!textMode && (
+                <button onClick={endCall} disabled={ended} style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(168,32,32,.07)', border: '1px solid rgba(168,32,32,.2)', color: 'rgba(168,32,32,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: ended ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: ended ? .25 : 1 }}
+                  onMouseEnter={e => { if (!ended) { e.currentTarget.style.background = 'rgba(168,32,32,.15)'; e.currentTarget.style.color = '#c04040'; } }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(168,32,32,.07)'; e.currentTarget.style.color = 'rgba(168,32,32,.5)'; }}>
+                  <IcoPhoneOff s={19} />
+                </button>
+              )}
+            </div>
+
+            <p style={{ textAlign: 'center', marginTop: '9px', fontSize: '.48rem', letterSpacing: '3px', color: 'rgba(44,36,64,.7)', fontFamily: 'Inter', fontWeight: 300 }}>
+              {textMode ? (lang === 'en' ? 'PRESS ENTER TO SEND' : 'এন্টার চাপুন') : (lang === 'en' ? 'HOLD · SPEAK · RELEASE' : 'ধরুন · বলুন · ছাড়ুন')}
+            </p>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>
